@@ -1,7 +1,14 @@
 const csv = require("csvtojson");
-const fs = require("fs");
+require("dotenv").config()
+// const fs = require("fs");
+const Car = require("./models/Car")
+const mongoose = require("mongoose")
 
 const processData = async () => {
+  mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Connected to Database"))
+  .catch((err) => console.log(err));
   let data = await csv().fromFile("data.csv");
   data = data.map((item) => ({
     make: item["Make"],
@@ -13,7 +20,7 @@ const processData = async () => {
     price: item["MSRP"],
     isDeleted: false,
   }));
-  fs.writeFileSync("cars.json", JSON.stringify(data));
+  await Car.create(data)
 };
 
 processData();
